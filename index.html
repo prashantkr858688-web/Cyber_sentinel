@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber-Sentinel v1.0 | Fraud Detection Engine</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --safe: #10b981;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: rgba(37, 99, 235, 0.2);
+      color: #60a5fa;
+      border: 1px solid #2563eb;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      background: #0d131f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 0.95rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+    }
+
+    .result-card {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0d131f;
+      display: none;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .status-pill {
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .status-safe { background: rgba(16, 185, 129, 0.2); color: var(--safe); }
+    .status-suspicious { background: rgba(245, 158, 11, 0.2); color: var(--warn); }
+    .status-critical { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+    .score {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .guidance-box {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #d1d5db;
+    }
+
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Cyber-Sentinel <span class="badge">v1.0</span></h1>
+      <p>Autonomous SMS, Banking & Threat Analysis Engine</p>
+    </div>
+
+    <label for="messageInput">Analyze Message / SMS Content:</label>
+    <textarea id="messageInput" placeholder="Paste the suspicious text, bank message, or link here..."></textarea>
+
+    <button onclick="analyzeThreat()">Scan Threat</button>
+
+    <div id="resultCard" class="result-card">
+      <div class="result-header">
+        <span id="statusPill" class="status-pill">Safe</span>
+        <span id="confidenceScore" class="score">Risk Score: 0%</span>
+      </div>
+      <div id="guidanceText" class="guidance-box"></div>
+    </div>
+
+    <div class="footer">
+      Powered by Cyber-Sentinel Heuristic Analysis Engine
+    </div>
+  </div>
+
+  <script>
+    function analyzeThreat() {
+      const input = document.getElementById("messageInput").value.trim().toLowerCase();
+      const resultCard = document.getElementById("resultCard");
+      const statusPill = document.getElementById("statusPill");
+      const score = document.getElementById("confidenceScore");
+      const guidance = document.getElementById("guidanceText");
+
+      if (!input) {
+        alert("Please enter a message to analyze.");
+        return;
+      }
+
+      // Heuristic detection parameters
+      const criticalKeywords = ["blocked", "kyc", "debit card suspended", "pan expired", "reward claim", "lottery", "otp", "apk"];
+      const suspiciousDomains = ["bit.ly", "tinyurl", ".xyz", ".top", ".buzz", ".ru", "ngrok", "is.gd"];
+
+      let riskScore = 0;
+      let matchedPatterns = [];
+
+      criticalKeywords.forEach(word => {
+        if (input.includes(word)) {
+          riskScore += 25;
+          matchedPatterns.push(word.toUpperCase());
+        }
+      });
+
+      suspiciousDomains.forEach(domain => {
+        if (input.includes(domain)) {
+          riskScore += 35;
+          matchedPatterns.push("SUSPICIOUS SHORT LINK");
+        }
+      });
+
+      if (input.includes("urgent") || input.includes("immediately") || input.includes("24 hours")) {
+        riskScore += 15;
+      }
+
+      riskScore = Math.min(riskScore, 100);
+
+      resultCard.style.display = "block";
+
+      if (riskScore >= 60) {
+        statusPill.className = "status-pill status-critical";
+        statusPill.textContent = "CRITICAL RISK";
+        score.textContent = `Risk Score: ${riskScore}%`;
+        guidance.innerHTML = `<strong>Warning:</strong> High probability of financial or credential phishing attempt.<br><strong>Triggers:</strong> ${matchedPatterns.join(", ")}.<br><strong>Action:</strong> Do not click links or share credentials. Block the sender immediately.`;
+      } else if (riskScore >= 25) {
+        statusPill.className = "status-pill status-suspicious";
+        statusPill.textContent = "SUSPICIOUS";
+        score.textContent = `Risk Score: ${riskScore}%`;
+        guidance.innerHTML = `<strong>Caution:</strong> The message contains potential phishing keywords.<br><strong>Action:</strong> Verify with the official entity directly. Avoid sharing private details.`;
+      } else {
+        statusPill.className = "status-pill status-safe";
+        statusPill.textContent = "SAFE";
+        score.textContent = `Risk Score: ${riskScore}%`;
+        guidance.innerHTML = `No known social-engineering or malicious indicators detected in the text.`;
+      }
+    }
+  </script>
+</body>
+</html>
